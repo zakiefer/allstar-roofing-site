@@ -1,9 +1,10 @@
 # All Star Roofing & Exteriors — website
 
-Static website generated from the Claude Design canvas export
-("Modern Heartland Site Design"). No build step, no framework —
-plain HTML + CSS + one small `site.js`. Host it anywhere that serves
-static files (Netlify, Vercel, Cloudflare Pages, GitHub Pages, S3…).
+Static website generated from the Claude Design handoff package
+("Modern Heartland Site Design", final revision). No build step, no
+framework — plain HTML + CSS + one small `site.js`. Host it anywhere
+that serves static files (Netlify, Vercel, Cloudflare Pages, GitHub
+Pages, S3…).
 
 ## Pages
 
