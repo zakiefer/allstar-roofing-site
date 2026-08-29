@@ -24,6 +24,13 @@
     poster.style.display = 'none';
   }
 
+  // Original component resets menuOpen when leaving mobile widths
+  var desktopMq = window.matchMedia('(min-width: 1140.02px)');
+  var onDesktop = function () {
+    if (desktopMq.matches && overlay) overlay.classList.remove('open');
+  };
+  if (desktopMq.addEventListener) desktopMq.addEventListener('change', onDesktop);
+
   function fieldValue(name) {
     var el = document.querySelector('[data-field="' + name + '"]');
     return el ? el.value : '';
@@ -39,12 +46,24 @@
     if (el) el.classList.toggle('show', show);
   }
 
+  // Original React form recomputes errors on every keystroke once a submit
+  // was attempted ("tried" state) — errors clear live as the user types
+  var tried = false;
+  function refreshErrors() {
+    toggleErr('name', tried && !fieldValue('name').trim());
+    toggleErr('phone', tried && fieldValue('phone').replace(/\D/g, '').length < 7);
+  }
+  ['name', 'phone'].forEach(function (f) {
+    var el = document.querySelector('[data-field="' + f + '"]');
+    if (el) el.addEventListener('input', refreshErrors);
+  });
+
   function submitForm() {
     var name = fieldValue('name').trim();
     var phoneOk = fieldValue('phone').replace(/\D/g, '').length >= 7;
-    toggleErr('name', !name);
-    toggleErr('phone', !phoneOk);
-    if (!name || !phoneOk) return;
+    if (!name || !phoneOk) { tried = true; refreshErrors(); return; }
+    tried = false;
+    refreshErrors();
     var panel = document.querySelector('[data-form-panel]');
     var thanks = document.querySelector('[data-thanks-panel]');
     var thanksName = document.querySelector('[data-thanks-name]');
@@ -56,7 +75,8 @@
   function resetForm() {
     ['name', 'phone', 'town', 'msg'].forEach(function (f) { setField(f, ''); });
     setField('ptype', 'Home');
-    ['name', 'phone'].forEach(function (f) { toggleErr(f, false); });
+    tried = false;
+    refreshErrors();
     var panel = document.querySelector('[data-form-panel]');
     var thanks = document.querySelector('[data-thanks-panel]');
     if (thanks) thanks.classList.remove('show');
