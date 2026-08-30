@@ -31,10 +31,15 @@ then open http://localhost:4173
 
 - `site.js` powers the mobile menu, scroll-reveal animations, the
   click-to-play YouTube embeds, and the contact form.
-- The contact form is front-end only: it validates and shows the
-  thank-you panel but does not send the request anywhere yet. Wire it
-  to a form backend (Formspree, Netlify Forms, Basin, or an email
-  service) before launch.
+- The contact form submits via FormSubmit.co to 812allstar@gmail.com
+  (see FORM_ENDPOINT in site.js to change the recipient). IMPORTANT:
+  the first-ever submission triggers FormSubmit's one-time activation
+  email to that inbox — it must be confirmed once before submissions
+  are delivered. On network failure the form shows a call-us fallback
+  message instead of a false success.
+- Select dropdowns use `appearance:none` with a drawn chevron so they
+  render identically in Safari, Chrome, and Firefox (Safari's native
+  select ignores field padding and draws a double-arrow control).
 - All images are local in `assets/` (the AI-generated hero/section
   images were downloaded from the design's CDN links and compressed).
 - Fonts load from Google Fonts (Besley, Barlow, Barlow Condensed, Caveat).

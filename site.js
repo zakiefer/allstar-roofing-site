@@ -58,18 +58,68 @@
     if (el) el.addEventListener('input', refreshErrors);
   });
 
-  function submitForm() {
-    var name = fieldValue('name').trim();
-    var phoneOk = fieldValue('phone').replace(/\D/g, '').length >= 7;
-    if (!name || !phoneOk) { tried = true; refreshErrors(); return; }
-    tried = false;
-    refreshErrors();
+  // Form backend: FormSubmit.co AJAX endpoint delivering to the business
+  // inbox already published on the site. NOTE: the first-ever submission
+  // triggers FormSubmit's one-time activation email to this address; the
+  // inbox owner must click it once before submissions are delivered.
+  var FORM_ENDPOINT = 'https://formsubmit.co/ajax/812allstar@gmail.com';
+
+  function showThanks(name) {
     var panel = document.querySelector('[data-form-panel]');
     var thanks = document.querySelector('[data-thanks-panel]');
     var thanksName = document.querySelector('[data-thanks-name]');
     if (thanksName) thanksName.textContent = name ? ', ' + name.split(/\s+/)[0] : '';
     if (panel) panel.classList.add('hide');
     if (thanks) thanks.classList.add('show');
+  }
+
+  function sendError(show) {
+    var el = document.querySelector('[data-send-error]');
+    if (!el && show) {
+      var btn = document.querySelector('[data-action="submit-form"]');
+      el = document.createElement('p');
+      el.setAttribute('data-send-error', '');
+      el.style.cssText = 'margin:10px 0 0;font-size:13.5px;line-height:1.5;font-weight:600;color:#B22730;text-align:center';
+      el.textContent = "Something went wrong sending your request — please call (812) 499-2890 and we'll take it from there.";
+      btn.parentElement.insertBefore(el, btn.nextSibling);
+    }
+    if (el) el.style.display = show ? '' : 'none';
+  }
+
+  function submitForm() {
+    var name = fieldValue('name').trim();
+    var phoneOk = fieldValue('phone').replace(/\D/g, '').length >= 7;
+    if (!name || !phoneOk) { tried = true; refreshErrors(); return; }
+    tried = false;
+    refreshErrors();
+    sendError(false);
+    var btn = document.querySelector('[data-action="submit-form"]');
+    var label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    fetch(FORM_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        phone: fieldValue('phone'),
+        town: fieldValue('town'),
+        property: fieldValue('ptype'),
+        message: fieldValue('msg'),
+        _subject: 'Free inspection request — ' + name,
+        _template: 'table'
+      })
+    }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function () {
+      showThanks(name);
+    }).catch(function () {
+      sendError(true);
+    }).finally(function () {
+      btn.disabled = false;
+      btn.textContent = label;
+    });
   }
 
   function resetForm() {
